@@ -3,12 +3,41 @@ from django.http import HttpResponse
 # Create your views here.
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+
+from users.models import User
 from . import serializers
 from rest_framework.views import APIView
 from meiduo_mall.libs.captcha.captcha import captcha
 from django_redis import get_redis_connection
 from . import constants
 from celery_tasks.sms.tasks import send_sms_code
+
+
+class UsernameCountView(APIView):
+    """用户名数量"""
+
+    def get(self, request, username):
+        """获取指定用户名的数量"""
+        count = User.objects.filter(username=username).count()
+        data = {
+            username: 'username',
+            count: 'count'
+        }
+        return Response(data)
+
+class MobileCountView(APIView):
+    """手机号数量"""
+
+    def get(self, request, mobile):
+        """获取手机号数量"""
+        count = User.objects.filter(mobile=mobile)
+        data = {
+            mobile: 'mobile',
+            count: 'count'
+        }
+
+
+
 
 
 class ImageCodeView(APIView):
