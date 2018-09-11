@@ -1,7 +1,7 @@
 import random
 from django.http import HttpResponse
 # Create your views here.
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, CreateAPIView
 from rest_framework.response import Response
 
 from users.models import User
@@ -12,29 +12,6 @@ from django_redis import get_redis_connection
 from . import constants
 from celery_tasks.sms.tasks import send_sms_code
 
-
-class UsernameCountView(APIView):
-    """用户名数量"""
-
-    def get(self, request, username):
-        """获取指定用户名的数量"""
-        count = User.objects.filter(username=username).count()
-        data = {
-            username: 'username',
-            count: 'count'
-        }
-        return Response(data)
-
-class MobileCountView(APIView):
-    """手机号数量"""
-
-    def get(self, request, mobile):
-        """获取手机号数量"""
-        count = User.objects.filter(mobile=mobile)
-        data = {
-            mobile: 'mobile',
-            count: 'count'
-        }
 
 
 
@@ -83,7 +60,7 @@ class SMSCodeView(GenericAPIView):
 
         # # 发送短信验证码
         # ccp = CCP()
-        # time = str(constants.SMS_CODE_REDIS_EXPIRES//60)
+        # time = str(constants.SMS_CODE_REDIS_EXPIRES/60)
         # ccp.send_template_sms(mobile,[sms_code, time], constants.SMS_CODE_TEMP_ID)
 
         send_sms_code.delay(mobile, sms_code)
