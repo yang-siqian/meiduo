@@ -32,9 +32,9 @@ class ImageCodeCheckSerializer(serializers.Serializer):
             raise serializers.ValidationError('图片验证码错误')
 
         # 判断是否在60s内
-        mobile = self.context['view'].kwargs['mobile']
-        send_flag = redis_conn.get('send_flag_%s'% mobile)
-
-        if send_flag:
-            raise serializers.ValidationError('请求次数过于频繁')
+        mobile = self.context['view'].kwargs.get('mobile')
+        if mobile:
+            send_flag = redis_conn.get('send_flag_%s'% mobile)
+            if send_flag:
+                raise serializers.ValidationError('请求次数过于频繁')
         return attrs
