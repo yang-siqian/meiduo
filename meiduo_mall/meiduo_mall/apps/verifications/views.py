@@ -42,6 +42,7 @@ class SMSCodeByTokenView(APIView):
 
         # 发送短信验证码
         send_sms_code.delay(mobile, sms_code)
+        print(sms_code)
         return Response({'message': 'OK'}, status=status.HTTP_200_OK)
 
 

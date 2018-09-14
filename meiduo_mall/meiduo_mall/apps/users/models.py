@@ -41,3 +41,13 @@ class User(AbstractUser):
         else:
             mobile = data.get('mobile')
             return mobile
+
+
+    def generate_set_password_token(self):
+        """
+        生成修改密码的token
+        """
+        serializer = TJWSerializer(settings.SECRET_KEY, constants.SET_PASSWORD_TOKEN_EXPIRES)
+        data = {'user_id': self.id}
+        token = serializer.dumps(data)
+        return token.decode()
