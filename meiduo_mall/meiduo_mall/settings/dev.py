@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'users.apps.UsersConfig',
-    'verifications.apps.VerificationsConfig'
+    'verifications.apps.VerificationsConfig',
+    'oauth.apps.OauthConfig',
 ]
 
 MIDDLEWARE = [
@@ -235,3 +236,10 @@ CORS_ALLOW_CREDENTIALS = True # 允许携带cookie
 AUTHENTICATION_BACKENDS = [
     'users.utils.UsernameMobileAuthBackend'
 ]
+
+
+# QQ登录参数
+QQ_APP_ID = '101474184'
+QQ_APP_KEY = 'c6ce949e04e12ecc909ae6a8b09b637c'
+QQ_REDIRECT_URL = 'http://www.meiduo.site:8080/oauth_callback.html'
+QQ_STATE = '/'
