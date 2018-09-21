@@ -3,8 +3,9 @@ from django.core.files.storage import Storage
 from django.utils.deconstruct import deconstructible
 from fdfs_client.client import Fdfs_client
 
+
 @deconstructible
-class FasfDFSStorage(Storage):
+class FastDFSStorage(Storage):
     """自定义文件存储系统"""
     def __init__(self, base_url=None, client_conf=None):
         if base_url is None:
