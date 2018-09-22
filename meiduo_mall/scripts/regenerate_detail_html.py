@@ -6,6 +6,9 @@
     ./regenerate_detail_html.py
 """
 import sys
+
+from django.conf import settings
+
 sys.path.insert(0, '../')
 sys.path.insert(0, '../meiduo_mall/apps')
 
@@ -18,7 +21,7 @@ django.setup()
 
 
 from django.template import loader
-from django.conf import settings
+
 
 from goods.utils import get_categories
 from goods.models import SKU
