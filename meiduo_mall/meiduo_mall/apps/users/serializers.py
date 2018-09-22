@@ -5,6 +5,8 @@ from django_redis import get_redis_connection
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
+from goods.models import SKU
+from . import constants
 from .models import User, Address
 from .utils import get_user_by_account
 from celery_tasks.email.tasks import send_verify_email
@@ -109,6 +111,7 @@ class CheckSMSCodeSerializer(serializers.Serializer):
             raise serializers.ValidationError('短信验证码错误')
         return value
 
+
 class ResetPasswordSerializer(serializers.ModelSerializer):
     """
     重置密码序列化器
@@ -192,8 +195,6 @@ class EmailSerializer(serializers.ModelSerializer):
         return instance
 
 
-
-
 class UserAddressSerializer(serializers.ModelSerializer):
     """
     用户地址序列化器
@@ -233,4 +234,33 @@ class AddressTitleSerializer(serializers.ModelSerializer):
         model = Address
         fields = ('title',)
 
+
+class AddUserBrowseHistorySerializer(serializers.Serializer):
+    """保存用户浏览记录的序列化器"""
+
+    sku_id = serializers.IntegerField(min_value=1, required=True)
+
+    def validate_sku_id(self, value):
+        """
+        检验sku_id是否存在
+        :return:value
+        """
+        try:
+            SKU.objects.get(id=value)
+        except SKU.DoesNotExist:
+            raise serializers.ValidationError('sku_id不存在')
+        else:
+            return value
+
+    def create(self, validated_data):
+        """保存"""
+        user_id = self.context['request'].user.id
+        sku_id = validated_data['sku_id']
+        redis_conn = get_redis_connection('history')
+        pl = redis_conn.pipeline()     # 使用管道一次性将请求全部提交，然后再一次性提取结果
+        pl.lrem('history_%s' % user_id, 0, sku_id)
+        pl.lpush('history_%s' % user_id, 0, sku_id)
+        pl.ltrim('history_%s' % user_id, 0, constants.USER_BROWSE_HISTORY_LIMIT-1)
+        pl.execute()
+        return validated_data
 

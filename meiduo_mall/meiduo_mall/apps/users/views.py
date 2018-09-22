@@ -11,12 +11,11 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
 from users.models import User
+from users.serializers import AddUserBrowseHistorySerializer
 from . import serializers
 from verifications.serializers import ImageCodeCheckSerializer
 from .utils import get_user_by_account
 from . import constants
-
-
 
 
 
@@ -51,6 +50,7 @@ class MobileCountView(APIView):
         }
         return Response(data)
 
+
 class SMSCodeTokenView(GenericAPIView):
     """根据账号和图片验证码获取发送短信的token"""
     # 校验图片验证码
@@ -68,7 +68,6 @@ class SMSCodeTokenView(GenericAPIView):
         # 处理手机号
         mobile = re.sub(r'(\d{3})\d{4}(\d{4})', r'\1****\2', user.mobile)
         return Response({'mobile': mobile, 'access_token': access_token})
-
 
 
 class PasswordTokenView(GenericAPIView):
@@ -103,6 +102,7 @@ class PasswordView(mixins.UpdateModelMixin, GenericAPIView):
 
 from rest_framework.permissions import IsAuthenticated
 
+
 class UserDetailView(RetrieveAPIView):
     """
     用户详情
@@ -114,7 +114,6 @@ class UserDetailView(RetrieveAPIView):
         return self.request.user
 
 
-
 class EmailView(UpdateAPIView):
     """
     保存用户邮箱
@@ -124,8 +123,6 @@ class EmailView(UpdateAPIView):
 
     def get_object(self):
         return self.request.user
-
-
 
 
 class VerifyEmailView(APIView):
@@ -146,7 +143,6 @@ class VerifyEmailView(APIView):
             user.email_active = True
             user.save()
             return Response({'message': 'OK'})
-
 
 
 class AddressViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin, GenericViewSet):
@@ -222,6 +218,19 @@ class AddressViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin, GenericVi
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+
+class UserBrowseHistoryView(mixins.CreateModelMixin, GenericAPIView):
+    """
+    用户浏览历史记录
+    """
+    serializer_class = AddUserBrowseHistorySerializer
+    permission_classes = [IsAuthenticated]   # 限制未登录用户无访问权限
+    def post(self, request):
+        """保存"""
+        return self.create(request)
+
+
 
 
 
