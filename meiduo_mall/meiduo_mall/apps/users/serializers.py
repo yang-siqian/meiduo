@@ -264,7 +264,7 @@ class AddUserBrowseHistorySerializer(serializers.Serializer):
 
         # 向redis追加数据
         # lpush  [1,2,3,4] 5   -> [5,1,2,3,4]
-        pl.lpush('history_%s' % user_id, sku_id)
+        pl.lpush('history_%s' % user_id, sku_id)        #注意！！！！
 
         # 如果超过数量，截断
         # ltrim(name, start, end)
