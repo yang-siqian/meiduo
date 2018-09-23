@@ -258,8 +258,16 @@ class AddUserBrowseHistorySerializer(serializers.Serializer):
         sku_id = validated_data['sku_id']
         redis_conn = get_redis_connection('history')
         pl = redis_conn.pipeline()     # 使用管道一次性将请求全部提交，然后再一次性提取结果
+        # 清除sku_id在redis中的记录
+        # lrem(name, count, value)
         pl.lrem('history_%s' % user_id, 0, sku_id)
-        pl.lpush('history_%s' % user_id, 0, sku_id)
+
+        # 向redis追加数据
+        # lpush  [1,2,3,4] 5   -> [5,1,2,3,4]
+        pl.lpush('history_%s' % user_id, sku_id)
+
+        # 如果超过数量，截断
+        # ltrim(name, start, end)
         pl.ltrim('history_%s' % user_id, 0, constants.USER_BROWSE_HISTORY_LIMIT-1)
         pl.execute()
         return validated_data

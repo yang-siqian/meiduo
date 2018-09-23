@@ -3,6 +3,7 @@ import re
 from django.shortcuts import render
 
 # Create your views here.
+from django_redis import get_redis_connection
 from rest_framework import status, mixins
 from rest_framework.decorators import action
 from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView, UpdateAPIView
@@ -10,6 +11,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 
+from goods.models import SKU
+from goods.serializers import SKUSerializer
 from users.models import User
 from users.serializers import AddUserBrowseHistorySerializer
 from . import serializers
@@ -226,9 +229,28 @@ class UserBrowseHistoryView(mixins.CreateModelMixin, GenericAPIView):
     """
     serializer_class = AddUserBrowseHistorySerializer
     permission_classes = [IsAuthenticated]   # 限制未登录用户无访问权限
+
+
     def post(self, request):
         """保存"""
         return self.create(request)
+
+
+    def get(self, request):
+        """
+        获取
+        """
+        user_id = request.user.id
+        redis_conn = get_redis_connection("history")
+        history = redis_conn.lrange("history_%s" % user_id, 0, constants.USER_BROWSE_HISTORY_LIMIT - 1)
+        print(history)
+        sku_list = []
+        for sku_id in history:
+            sku = SKU.objects.get(id=sku_id)
+            sku_list.append(sku)
+
+        s = SKUSerializer(sku_list, many=True)
+        return Response(s.data)
 
 
 
