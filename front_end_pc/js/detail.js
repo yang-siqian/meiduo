@@ -33,9 +33,10 @@ var vm = new Vue({
             return (this.sku_price * this.sku_count).toFixed(2);
         }
     },
-mounted: function(){
+    mounted: function(){
         // 添加用户浏览历史记录
         this.get_sku_id();
+        // 添加用户浏览历史记录
         if (this.user_id) {
             axios.post(this.host+'/browse_histories/', {
                 sku_id: this.sku_id
@@ -77,9 +78,25 @@ mounted: function(){
                 this.sku_count--;
             }
         },
-        // 添加购物车
-        add_cart: function(){
-
+         // 添加购物车
+        add_cart: function() {
+            axios.post(this.host + '/cart/', {
+                sku_id: parseInt(this.sku_id),
+                count: this.sku_count
+            }, {
+                headers: {
+                    'Authorization': 'JWT ' + this.token
+                },
+                responseType: 'json',
+                withCredentials: true
+            })
+                .then(response => {
+                    this.cart_total_count += response.data.count;
+                })
+                .catch(error => {
+                    alert(error.response.message[0]);
+                    console.log(error.response.data);
+                })
         },
         // 获取购物车数据
         get_cart: function(){
@@ -87,7 +104,7 @@ mounted: function(){
         },
         // 获取热销商品数据
         get_hot_goods: function(){
-             axios.get(this.host+'/categories/'+this.cat+'/hotskus/', {
+            axios.get(this.host+'/categories/'+this.cat+'/hotskus/', {
                     responseType: 'json'
                 })
                 .then(response => {
